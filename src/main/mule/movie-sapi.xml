@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <http:listener-config name="movie-sapi-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="movie-sapi-config" api="resource::0d501a90-6d34-43c6-b74e-b50a517c7af5:movie-sapi:0.0.4:raml:zip:movie-sapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="movie-sapi-main">
+        <http:listener config-ref="movie-sapi-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="movie-sapi-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="movie-sapi-console">
+        <http:listener config-ref="movie-sapi-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="movie-sapi-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="put:\movies\(id):application\json:movie-sapi-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  links: {
+    self: "http://.../movies/1"
+  },
+  data: {
+    "type": "movies",
+    id: "1",
+    attributes: {
+      title: "The Terminator",
+      description: "blah",
+      year: 1977,
+      duration: 102,
+      languages: [
+        "English"
+      ],
+      genres: [
+        "Sci-Fi", 
+        "Action"
+      ],
+      gross: 1234212.232,
+      timestamps: {
+        created: "2014-01-01T23:28:56.782Z",
+        updated: "2014-01-01T23:28:56.782Z"
+      }
+    }
+  }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\movies\(id):movie-sapi-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  code: 400,
+  message: "Bad Request",
+  description: "Invalid input payload",
+  datetime: "2022-03-08T09:54:00.000Z",
+  transactionId: "daeef08c-5e4d-4bab-b896-88f0971cb849"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="patch:\movies\(id):application\json:movie-sapi-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  links: {
+    self: "http://.../movies/1"
+  },
+  data: {
+    "type": "movies",
+    id: "1",
+    attributes: {
+      title: "The Terminator",
+      description: "blah",
+      year: 1977,
+      duration: 102,
+      languages: [
+        "English"
+      ],
+      genres: [
+        "Sci-Fi", 
+        "Action"
+      ],
+      gross: 1234212.232,
+      timestamps: {
+        created: "2014-01-01T23:28:56.782Z",
+        updated: "2014-01-01T23:28:56.782Z"
+      }
+    }
+  }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\movies:movie-sapi-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  links: {
+    self: "http://example.com/movies",
+    next: "http://example.com/movies?page[offset]=2",
+    last: "http://example.com/movies?page[offset]=10"
+  },
+  data: [
+    {
+      "type": "movies",
+      id: "1",
+      attributes: {
+        title: "The Terminator",
+        description: "blah",
+        year: 1977,
+        duration: 102,
+        languages: [
+          "English"
+        ],
+        genres: [
+          "Sci-Fi", 
+          "Action"
+        ],
+        gross: 1234212.232,
+        timestamps: {
+          created: "2014-01-01T23:28:56.782Z",
+          updated: "2014-01-01T23:28:56.782Z"
+        }
+      }
+    }, 
+    {
+      "type": "movies",
+      id: "1",
+      attributes: {
+        title: "The Terminator",
+        description: "blah",
+        year: 1977,
+        duration: 102,
+        languages: [
+          "English"
+        ],
+        genres: [
+          "Sci-Fi", 
+          "Action"
+        ],
+        gross: 1234212.232,
+        timestamps: {
+          created: "2014-01-01T23:28:56.782Z",
+          updated: "2014-01-01T23:28:56.782Z"
+        }
+      }
+    }
+  ]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\movies\(id):movie-sapi-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  links: {
+    self: "http://.../movies/1"
+  },
+  data: {
+    "type": "movies",
+    id: "1",
+    attributes: {
+      title: "The Terminator",
+      description: "blah",
+      year: 1977,
+      duration: 102,
+      languages: [
+        "English"
+      ],
+      genres: [
+        "Sci-Fi", 
+        "Action"
+      ],
+      gross: 1234212.232,
+      timestamps: {
+        created: "2014-01-01T23:28:56.782Z",
+        updated: "2014-01-01T23:28:56.782Z"
+      }
+    }
+  }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\movies:application\json:movie-sapi-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  links: {
+    self: "http://.../movies/1"
+  },
+  data: {
+    "type": "movies",
+    id: "1",
+    attributes: {
+      title: "The Terminator",
+      description: "blah",
+      year: 1977,
+      duration: 102,
+      languages: [
+        "English"
+      ],
+      genres: [
+        "Sci-Fi", 
+        "Action"
+      ],
+      gross: 1234212.232,
+      timestamps: {
+        created: "2014-01-01T23:28:56.782Z",
+        updated: "2014-01-01T23:28:56.782Z"
+      }
+    }
+  }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+</mule>
