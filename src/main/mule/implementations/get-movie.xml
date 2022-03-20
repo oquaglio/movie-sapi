@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="get-movieFlow" doc:id="a360a22c-b4eb-41d0-b563-bbc1fd544e3f" >
+		<logger level="INFO" doc:name="Logger" doc:id="a48f7d9b-a9ed-4e58-b966-b005567a7960" message="Get request received"/>
+		<ee:transform doc:name="Transform Message" doc:id="28522938-75cb-46dc-a321-5d5ce0927be3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  links: {
+    self: "http://example.com/movies",
+    next: "http://example.com/movies?page[offset]=2",
+    last: "http://example.com/movies?page[offset]=10"
+  },
+  data: [
+    {
+      "type": "movies",
+      id: "1",
+      attributes: {
+        title: "The Terminator",
+        description: "blah",
+        year: 1977,
+        duration: 102,
+        languages: [
+          "English"
+        ],
+        genres: [
+          "Sci-Fi", 
+          "Action"
+        ],
+        gross: 1234212.232,
+        timestamps: {
+          created: "2014-01-01T23:28:56.782Z",
+          updated: "2014-01-01T23:28:56.782Z"
+        }
+      }
+    }, 
+    {
+      "type": "movies",
+      id: "1",
+      attributes: {
+        title: "The Terminator",
+        description: "blah",
+        year: 1977,
+        duration: 102,
+        languages: [
+          "English"
+        ],
+        genres: [
+          "Sci-Fi", 
+          "Action"
+        ],
+        gross: 1234212.232,
+        timestamps: {
+          created: "2014-01-01T23:28:56.782Z",
+          updated: "2014-01-01T23:28:56.782Z"
+        }
+      }
+    }
+  ]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="put-movieFlow" doc:id="d7b723bf-5dd7-48de-9671-dce525f0c233" >
+		<logger level="INFO" doc:name="Logger" doc:id="14f72f4e-069f-4e8a-b65e-38612cd30d2b" message="Put request received"/>
+		<ee:transform doc:name="Transform Message" doc:id="b79dad2f-8cec-4d6b-a5ba-e1fed453f7e3" >
+			<ee:variables >
+				<ee:set-variable variableName="id" ><![CDATA[attributes.uriParams.'id']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="2c35609f-c387-4b93-9178-94cef78b95a6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  links: {
+    self: "http://.../movies/1"
+  },
+  data: {
+    "type": "movies",
+    id: "1",
+    attributes: {
+      title: "The Terminator",
+      description: "blah",
+      year: 1977,
+      duration: 102,
+      languages: [
+        "English"
+      ],
+      genres: [
+        "Sci-Fi", 
+        "Action"
+      ],
+      gross: 1234212.232,
+      timestamps: {
+        created: "2014-01-01T23:28:56.782Z",
+        updated: "2014-01-01T23:28:56.782Z"
+      }
+    }
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="patch-movieFlow" doc:id="f9a61771-c8e9-412d-8705-ea2f054956c8" >
+		<logger level="INFO" doc:name="Logger" doc:id="9ae53ba8-4698-4312-9b02-e1123f92aefd" message="Patch request received"/>
+		<ee:transform doc:name="Transform Message" doc:id="f234fbd1-faae-402b-8c2d-aebf37f19556" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  links: {
+    self: "http://.../movies/1"
+  },
+  data: {
+    "type": "movies",
+    id: "1",
+    attributes: {
+      title: "The Terminator",
+      description: "blah",
+      year: 1977,
+      duration: 102,
+      languages: [
+        "English"
+      ],
+      genres: [
+        "Sci-Fi", 
+        "Action"
+      ],
+      gross: 1234212.232,
+      timestamps: {
+        created: "2014-01-01T23:28:56.782Z",
+        updated: "2014-01-01T23:28:56.782Z"
+      }
+    }
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="5d650e9f-dc92-49ed-a827-2b2b1d34d465" >
+			<ee:variables >
+				<ee:set-variable variableName="id" ><![CDATA[attributes.uriParams.'id']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+</mule>
