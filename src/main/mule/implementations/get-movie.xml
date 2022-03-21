@@ -5,7 +5,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<flow name="get-movieFlow" doc:id="a360a22c-b4eb-41d0-b563-bbc1fd544e3f" >
-		<logger level="INFO" doc:name="Logger" doc:id="a48f7d9b-a9ed-4e58-b966-b005567a7960" message="Get request received"/>
+		<logger level="INFO" doc:name="Logger" doc:id="a48f7d9b-a9ed-4e58-b966-b005567a7960" message="Get request received, connecting to ${db.host}"/>
 		<ee:transform doc:name="Transform Message" doc:id="28522938-75cb-46dc-a321-5d5ce0927be3" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0

@@ -129,10 +129,10 @@ output application/json
 		<flow-ref doc:name="Flow Reference" doc:id="8db8b719-7509-425f-b2ad-d266951814b5" name="patch-movieFlow"/>
     </flow>
     <flow name="get:\movies:movie-sapi-config">
-		<flow-ref doc:name="Flow Reference" doc:id="9499d3c6-3033-4351-a2c7-738012825485" name="get-movieFlow"/>
+		<flow-ref doc:name="Flow Reference" doc:id="9499d3c6-3033-4351-a2c7-738012825485" name="get-moviesFlow"/>
     </flow>
     <flow name="get:\movies\(id):movie-sapi-config">
-		<flow-ref doc:name="Flow Reference" doc:id="d4a8bae0-8cd5-4040-b92c-9063aff042dd" name="get-moviesFlow"/>
+		<flow-ref doc:name="Flow Reference" doc:id="d4a8bae0-8cd5-4040-b92c-9063aff042dd" name="get-movieFlow"/>
     </flow>
     <flow name="post:\movies:application\json:movie-sapi-config">
 		<flow-ref doc:name="Flow Reference" doc:id="8ef58865-2d51-46ca-a553-9e13cf9b8543" name="post-movieFlow"/>
