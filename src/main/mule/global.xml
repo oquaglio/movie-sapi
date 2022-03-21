@@ -11,4 +11,6 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
     <apikit:config name="movie-sapi-config" api="resource::0d501a90-6d34-43c6-b74e-b50a517c7af5:movie-sapi:0.0.4:raml:zip:movie-sapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-	</mule>
+	<configuration-properties doc:name="Configuration properties" doc:id="8fd4ceab-fb15-4186-8fef-97bc34bad622" file="movie-sapi-${env}.yaml" />
+	
+</mule>
