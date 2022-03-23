@@ -18,10 +18,31 @@
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{message: "Bad request"}]]></ee:set-payload>
+{
+  "errors": [
+    {
+      "id": 1234,
+      "links": {
+        "about": "http://.../400.html"
+      },
+      "status": "400",
+      "code": "1234",
+      "title": "Bad Request",
+      "detail": "Request doesn't conform to specification",
+      "source": {
+        "pointer": "/data/attributes/title",
+        "parameter": "search"
+      },
+      "meta": {
+        "transactionId": "daeef08c-5e4d-4bab-b896-88f0971cb849",
+        "dateTime": "2022-03-08T09:54:00.000Z"
+      }
+    }
+  ]
+}]]></ee:set-payload>
                     </ee:message>
                     <ee:variables>
-                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
