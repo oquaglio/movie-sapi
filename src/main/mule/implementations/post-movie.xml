@@ -13,7 +13,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		</db:my-sql-connection>
 	</db:config>
 	<flow name="post-movieFlow" doc:id="5902d33c-1b7b-458d-8917-64946081d04d" >
-		<logger level="INFO" doc:name="Post Received" doc:id="ebee02f4-abfe-4879-9345-30be76e7f08c" message="Post request received #[message]"/>
+		<logger level="INFO" doc:name="Post Received" doc:id="ebee02f4-abfe-4879-9345-30be76e7f08c" message="Post request received #[payload.data.attributes.title] #[payload] #[message]"/>
 		<ee:transform doc:name="Transform Message" doc:id="b58d444c-4e2a-421d-ada7-12020b71f5ec" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
