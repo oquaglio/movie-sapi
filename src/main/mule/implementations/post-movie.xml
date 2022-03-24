@@ -24,7 +24,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	movie_gross: payload.data.attributes.gross
 }]]]></db:input-parameters>
 		</db:insert>
-		<ee:transform doc:name="Transform Message" doc:id="b58d444c-4e2a-421d-ada7-12020b71f5ec">
+		<ee:transform doc:name="Set Response" doc:id="b58d444c-4e2a-421d-ada7-12020b71f5ec">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -41,13 +41,6 @@ output application/json
       description: "blah",
       year: 1977,
       duration: 102,
-      languages: [
-        "English"
-      ],
-      genres: [
-        "Sci-Fi", 
-        "Action"
-      ],
       gross: 1234212.232,
       timestamps: {
         created: "2014-01-01T23:28:56.782Z",
