@@ -14,9 +14,19 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	</db:config>
 	<flow name="post-movieFlow" doc:id="5902d33c-1b7b-458d-8917-64946081d04d" >
 		<logger level="INFO" doc:name="Post Received" doc:id="ebee02f4-abfe-4879-9345-30be76e7f08c" message="Post request received; title: #[payload.data.attributes.title], released: #[payload.data.attributes.released] #[payload] #[message]"/>
-		<ee:transform doc:name="Transform Message" doc:id="b58d444c-4e2a-421d-ada7-12020b71f5ec" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<db:insert doc:name="Insert New Movie" doc:id="b37bc431-be2f-4f23-8958-040156c21cc8" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO movie (title, description, released, duration, gross) VALUES (:movie_title, :movie_desc, :movie_rel, :movie_dur, :movie_gross)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	movie_title: payload.data.attributes.title,
+	movie_desc: payload.data.attributes.description,
+	movie_rel: payload.data.attributes.released,
+	movie_dur: payload.data.attributes.duration,
+	movie_gross: payload.data.attributes.gross
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="b58d444c-4e2a-421d-ada7-12020b71f5ec">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
@@ -48,15 +58,5 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<db:insert doc:name="Insert" doc:id="b37bc431-be2f-4f23-8958-040156c21cc8" config-ref="Database_Config">
-			<db:sql ><![CDATA[INSERT INTO movie (title, description, released, duration, gross) VALUES (:movie_title, :movie_desc, :movie_rel, :movie_dur, :movie_gross)]]></db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	movie_title: payload.data.attributes.title,
-	movie_desc: payload.data.attributes.description,
-	movie_rel: payload.data.attributes.released,
-	movie_dur: payload.data.attributes.duration,
-	movie_gross: payload.data.attributes.gross
-}]]]></db:input-parameters>
-		</db:insert>
 	</flow>
 </mule>
