@@ -13,7 +13,11 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		</db:my-sql-connection>
 	</db:config>
 	<flow name="post-movieFlow" doc:id="5902d33c-1b7b-458d-8917-64946081d04d" >
-		<logger level="INFO" doc:name="Post Received" doc:id="ebee02f4-abfe-4879-9345-30be76e7f08c" message="Post request received; title: #[payload.data.attributes.title], released: #[payload.data.attributes.released] #[payload] #[message]"/>
+		<logger level="INFO" doc:name="Post Received" doc:id="ebee02f4-abfe-4879-9345-30be76e7f08c" message="Post request received; host: #[attributes.headers.host], relativepath:#[attributes.requestPath] , title: #[payload.data.attributes.title], released: #[payload.data.attributes.released]"/>
+		<set-variable value="#[payload.data.attributes.title]" doc:name="Set Title" doc:id="3c482972-7fab-40df-b9d4-bc5971517fa3" variableName="vars.title"/>
+		<set-variable value="#[payload.data.attributes.released]" doc:name="Set Released" doc:id="feba6a8c-b04f-42af-a5ba-69dfc5275a60" variableName="vars.released"/>
+		<set-variable value="#[attributes.requestPath]" doc:name="Set Request Path" doc:id="519cdd4a-b838-4841-86f8-9455426dff56" variableName="vars.reqpath"/>
+		<set-variable value="#[attributes.headers.host]" doc:name="Set Host" doc:id="418add44-d3a8-43ca-ae77-ff4f84ce1cc2" variableName="vars.host"/>
 		<db:insert doc:name="Insert New Movie" doc:id="b37bc431-be2f-4f23-8958-040156c21cc8" config-ref="Database_Config">
 			<db:sql ><![CDATA[INSERT INTO movie (title, description, released, duration, gross) VALUES (:movie_title, :movie_desc, :movie_rel, :movie_dur, :movie_gross)]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{
@@ -24,6 +28,14 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	movie_gross: payload.data.attributes.gross
 }]]]></db:input-parameters>
 		</db:insert>
+		<logger level="INFO" doc:name="Logger" doc:id="257c54bb-43a8-45f1-b127-48a2da733f83" message="Successfully inserted new record(s)"/>
+		<db:select doc:name="Get Movie" doc:id="e732a66c-2c7c-4bd0-919b-0900b3e981a1" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT id, title, description, released, duration, gross, created_at, updated_at from movie where title=:title and released=:released]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	title: vars.'vars.title',
+	released: vars.'vars.released'
+}]]]></db:input-parameters>
+		</db:select>
 		<ee:transform doc:name="Set Response" doc:id="b58d444c-4e2a-421d-ada7-12020b71f5ec">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -31,26 +43,26 @@ output application/json
 ---
 {
   links: {
-    self: "http://.../movies/1"
+    self: "http://" ++ vars.'vars.host' ++ "/movie-sapi" ++ vars.'vars.reqpath' ++ "/" ++ payload[0].id 
   },
   data: {
     "type": "movies",
-    id: "1",
+    id: payload[0].id as String,
     attributes: {
       title: "The Terminator",
-      description: "blah",
-      year: 1977,
-      duration: 102,
-      gross: 1234212.232,
+      description: payload[0].description,
+      year: payload[0].released,
+      duration: payload[0].duration,
+      gross: payload[0].gross,
       timestamps: {
-        created: "2014-01-01T23:28:56.782Z",
-        updated: "2014-01-01T23:28:56.782Z"
+        created: payload[0].created_at,
+        updated: payload[0].updated_at
       }
     }
   }
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Flow Complete" doc:id="3a34ee86-a222-48cf-9d27-515974a7b770" message="The flow has completed"/>
+		<logger level="INFO" doc:name="Flow Complete" doc:id="3a34ee86-a222-48cf-9d27-515974a7b770" message="The flow has completed; resource id=payload[0].id"/>
 	</flow>
 </mule>
