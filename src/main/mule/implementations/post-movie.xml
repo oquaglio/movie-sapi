@@ -55,8 +55,8 @@ output application/json
       duration: payload[0].duration,
       gross: payload[0].gross,
       timestamps: {
-        created: payload[0].created_at,
-        updated: payload[0].updated_at
+        created: ((payload[0].created_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"}),
+        updated: ((payload[0].updated_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"})
       }
     }
   }
