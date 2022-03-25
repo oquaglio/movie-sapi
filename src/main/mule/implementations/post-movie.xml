@@ -43,7 +43,7 @@ output application/json
 ---
 {
   links: {
-    self: "http://" ++ vars.'vars.host' ++ "/movie-sapi" ++ vars.'vars.reqpath' ++ "/" ++ payload[0].id 
+    self: "http://" ++ vars.'vars.host' ++ "/" ++ app.name ++ vars.'vars.reqpath' ++ "/" ++ payload[0].id 
   },
   data: {
     "type": "movies",
