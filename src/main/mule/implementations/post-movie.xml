@@ -13,7 +13,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		</db:my-sql-connection>
 	</db:config>
 	<flow name="post-movieFlow" doc:id="5902d33c-1b7b-458d-8917-64946081d04d" >
-		<logger level="INFO" doc:name="Post Received" doc:id="ebee02f4-abfe-4879-9345-30be76e7f08c" message="Post request received; host: #[attributes.headers.host], relativepath:#[attributes.requestPath] , title: #[payload.data.attributes.title], released: #[payload.data.attributes.released]"/>
+		<logger level="INFO" doc:name="Request Received" doc:id="ebee02f4-abfe-4879-9345-30be76e7f08c" message="POST request received; host: #[attributes.headers.host], relativepath:#[attributes.requestPath] , title: #[payload.data.attributes.title], released: #[payload.data.attributes.released]"/>
 		<set-variable value="#[payload.data.attributes.title]" doc:name="Set Title" doc:id="3c482972-7fab-40df-b9d4-bc5971517fa3" variableName="vars.title"/>
 		<set-variable value="#[payload.data.attributes.released]" doc:name="Set Released" doc:id="feba6a8c-b04f-42af-a5ba-69dfc5275a60" variableName="vars.released"/>
 		<set-variable value="#[attributes.requestPath]" doc:name="Set Request Path" doc:id="519cdd4a-b838-4841-86f8-9455426dff56" variableName="vars.reqpath"/>
