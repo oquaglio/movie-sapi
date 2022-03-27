@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	<flow name="delete-movieFlow" doc:id="22d5f1e8-2c06-4ffe-b1d1-14c48bf57d74" >
-		<logger level="INFO" doc:name="Logger" doc:id="0346610d-1b9e-4954-a3f4-8d1d2fa52e63" message="Delete request received"/>
-		<ee:transform doc:name="Transform Message" doc:id="0c4b504d-b4de-4a5c-be6b-964f1059524c" >
-			<ee:variables >
-				<ee:set-variable variableName="id" ><![CDATA[attributes.uriParams.'id']]></ee:set-variable>
-			</ee:variables>
-		</ee:transform>
-		<ee:transform doc:name="Transform Message" doc:id="32cc2587-7db0-4c85-8cdd-3234446ad5ab" >
+		<logger level="INFO" doc:name="Request Received" doc:id="0346610d-1b9e-4954-a3f4-8d1d2fa52e63" message="DELETE request received; host: #[attributes.headers.host], relativepath:#[attributes.requestPath] , resource id: #[attributes.uriParams.id]"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set id" doc:id="65463595-04c2-4244-afb3-9cd9b2bd71a1" variableName="vars.id" />
+		<db:delete doc:name="Delete Movie" doc:id="dda81749-1e7e-48e4-bde4-650c57a585f1" config-ref="Database_Config">
+			<db:sql ><![CDATA[DELETE from movie where id=:id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: vars.'vars.id'
+}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Set Response" doc:id="32cc2587-7db0-4c85-8cdd-3234446ad5ab" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
+output application/java
 ---
-{
-  code: 400,
-  message: "Bad Request",
-  description: "Invalid input payload",
-  datetime: "2022-03-08T09:54:00.000Z",
-  transactionId: "daeef08c-5e4d-4bab-b896-88f0971cb849"
-}]]></ee:set-payload>
+{}]]></ee:set-payload>
 			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpStatus" ><![CDATA[204]]></ee:set-variable>
+			</ee:variables>
 		</ee:transform>
+		<logger level="INFO" doc:name="Flow Complete" doc:id="68958ef4-9909-442a-9d31-f14e3e8e5980" message="The flow has completed" />
 	</flow>
 </mule>
