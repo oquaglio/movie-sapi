@@ -11,7 +11,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<ee:set-variable variableName="id" ><![CDATA[attributes.uriParams.'id']]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<ee:transform doc:name="Transform Message" doc:id="a3c8dc8a-247b-4ad3-bbce-e7eee96de859" >
+		<ee:transform doc:name="Set Response" doc:id="a3c8dc8a-247b-4ad3-bbce-e7eee96de859" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -45,5 +45,6 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="INFO" doc:name="Flow Complete" doc:id="1e677963-4241-4fe6-b920-ccdc2eae04ed" message="The flow has completed" />
 	</flow>
 </mule>
