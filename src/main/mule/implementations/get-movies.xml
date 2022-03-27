@@ -19,30 +19,25 @@ output application/json
 ---
 {
   links: {
-    self: "http://.../movies/1"
+    self: "http://" ++ vars.'vars.host' ++ "/" ++ app.name ++ vars.'vars.reqpath'
   },
-  data: {
-    "type": "movies",
-    id: "1",
-    attributes: {
-      title: "The Terminator",
-      description: "blah",
-      year: 1977,
-      duration: 102,
-      languages: [
-        "English"
-      ],
-      genres: [
-        "Sci-Fi", 
-        "Action"
-      ],
-      gross: 1234212.232,
-      timestamps: {
-        created: "2014-01-01T23:28:56.782Z",
-        updated: "2014-01-01T23:28:56.782Z"
-      }
-    }
-  }
+  data: [
+	(payload map {
+		"type": "movies",
+		id: $.id as Number,
+		attributes:{
+			title: $.title as String,			
+			description: $.description as String,
+			released: $.released as Number,
+			duration: $.duration as Number,
+			gross: $.gross as Number,
+			timestamps: {
+				created: $.created_at,
+				updated: $.updated_at,
+			}
+		}		
+	})
+  ] 	  	
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
