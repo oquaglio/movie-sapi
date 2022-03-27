@@ -49,7 +49,7 @@ output application/json
     "type": "movies",
     id: payload[0].id as String,
     attributes: {
-      title: "The Terminator",
+      title: payload[0].title,
       description: payload[0].description,
       year: payload[0].released,
       duration: payload[0].duration,
