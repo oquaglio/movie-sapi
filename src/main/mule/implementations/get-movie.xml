@@ -7,7 +7,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	<flow name="get-movieFlow" doc:id="a360a22c-b4eb-41d0-b563-bbc1fd544e3f" >
 		<logger level="INFO" doc:name="Request Received" doc:id="a48f7d9b-a9ed-4e58-b966-b005567a7960" message="GET request received; host: #[attributes.headers.host], relativepath:#[attributes.requestPath] , resource id: #[attributes.uriParams.id]"/>
-		<set-variable value="#[attributes.uriParams.id]" doc:name="Set id" doc:id="677440ba-0aba-45f2-87cf-6cd7b80a99f8" variableName="vars.id"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Movie id" doc:id="677440ba-0aba-45f2-87cf-6cd7b80a99f8" variableName="vars.id"/>
 		<set-variable value="#[attributes.requestPath]" doc:name="Set Request Path" doc:id="80ecc26b-f28e-4ddb-aa93-a68d6017241d" variableName="vars.reqpath" />
 		<set-variable value="#[attributes.headers.host]" doc:name="Set Host" doc:id="47e1f2b5-0352-443b-8b3e-7ac7e89b17b2" variableName="vars.host"/>
 		<db:select doc:name="Get Movie" doc:id="839c79cb-fa14-46ee-a1d1-648520dbf0b6" config-ref="Database_Config">
@@ -15,6 +15,38 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 			<db:input-parameters ><![CDATA[#[{
 	id: vars.'vars.id'
 }]]]></db:input-parameters>
+		</db:select>
+		<set-variable value="#[payload[0]]" doc:name="Set Movie" doc:id="4ae6e887-8a46-4884-80c9-6fbecc90787b" variableName="vars.movie"/>
+		<db:select doc:name="Select Movie Languages" doc:id="db9eeeb6-5a8c-4303-ade8-96d90aab89aa" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from movie_language where movie_id = :movie_id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	movie_id: vars.'vars.id',
+}]]]></db:input-parameters>
+		</db:select>
+		<set-variable value="#[payload.language_id]" doc:name="Set Languages" doc:id="b348c1b2-8c8a-4cf1-94db-2fb4228015f0" variableName="vars.language_ids"/>
+		<ee:transform doc:name="Generate Dynamic In-Clause for Language Select" doc:id="b0c3a600-a0aa-4762-b955-ab65b123b52e">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="inClause"><![CDATA[%dw 2.0
+output application/java
+---
+vars.'vars.language_ids' map ":arg$$" reduce ((item, accumulator) -> accumulator ++ ", " ++ item)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Generate Dynamic InputParameters for Language Select" doc:id="1317b139-5455-4fe9-9e49-a12564be5eef">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="inputParameters"><![CDATA[%dw 2.0
+output application/java
+---
+vars.'vars.language_ids' map {"arg$$" : $} reduce ((item, accumulator = {}) -> item ++ accumulator)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<db:select doc:name="Select Languages" doc:id="e01ae91e-ceb4-4b76-a591-9f3a73c3e0bf" config-ref="Database_Config">
+			<db:sql ><![CDATA[#['select * from language where id in ( $(vars.inClause) )']]]></db:sql>
+			<db:input-parameters ><![CDATA[#[vars.inputParameters]]]></db:input-parameters>
 		</db:select>
 		<ee:transform doc:name="Set Response" doc:id="28522938-75cb-46dc-a321-5d5ce0927be3">
 			<ee:message>
@@ -27,19 +59,20 @@ output application/json
 	},
 	data: {
 		"type": "movies",
-		id: payload[0].id as String,
+		id: vars.'vars.movie'.id as String,
 		attributes: {
-	        title: payload[0].title,
-	        description: payload[0].description,
-			year: payload[0].released,
-			duration: payload[0].duration,
-			gross: payload[0].gross,
+			title: vars.'vars.movie'.title,
+			description: vars.'vars.movie'.description,
+			year: vars.'vars.movie'.released,
+			duration: vars.'vars.movie'.duration,
+			gross: vars.'vars.movie'.gross,
+			languages: payload.name,
 			timestamps: {
-				created: ((payload[0].created_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"}),
-				updated: ((payload[0].updated_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"})
+				created: ((vars.'vars.movie'.created_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"}),
+				updated: ((vars.'vars.movie'.updated_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"})
 			}
-      }
-    }  
+		}		 
+	}
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
