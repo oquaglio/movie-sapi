@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="e1f465e9-b12d-4d1c-a59a-433db3f9c7c8" >
 		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${secure::db.password}" database="movie" >
 			<db:connection-properties >
@@ -14,12 +15,12 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	</db:config>
 	<flow name="post-movieFlow" doc:id="5902d33c-1b7b-458d-8917-64946081d04d" >
 		<logger level="INFO" doc:name="Request Received" doc:id="ebee02f4-abfe-4879-9345-30be76e7f08c" message="POST request received; host: #[attributes.headers.host], relativepath:#[attributes.requestPath] , title: #[payload.data.attributes.title], released: #[payload.data.attributes.released]"/>
-		<set-variable value="#[payload.data.attributes.title]" doc:name="Set Title" doc:id="3c482972-7fab-40df-b9d4-bc5971517fa3" variableName="vars.title"/>
-		<set-variable value="#[payload.data.attributes.released]" doc:name="Set Released" doc:id="feba6a8c-b04f-42af-a5ba-69dfc5275a60" variableName="vars.released"/>
-		<set-variable value="#[attributes.requestPath]" doc:name="Set Request Path" doc:id="519cdd4a-b838-4841-86f8-9455426dff56" variableName="vars.reqpath"/>
-		<set-variable value="#[attributes.headers.host]" doc:name="Set Host" doc:id="418add44-d3a8-43ca-ae77-ff4f84ce1cc2" variableName="vars.host"/>
-		<set-variable value="#[payload.data.attributes.languages]" doc:name="Set Languages" doc:id="da20e0f6-7287-44fc-a257-eafe64cadb1b" variableName="vars.languages" mimeType="application/json"/>
-		<set-variable value="#[payload.data.attributes.genres]" doc:name="Set Genres" doc:id="e2ac17c5-4352-4487-9cc2-59a33fe93810" variableName="vars.genres"/>
+		<set-variable value="#[payload.data.attributes.title]" doc:name="Set Title" doc:id="3c482972-7fab-40df-b9d4-bc5971517fa3" variableName="title"/>
+		<set-variable value="#[payload.data.attributes.released]" doc:name="Set Released" doc:id="feba6a8c-b04f-42af-a5ba-69dfc5275a60" variableName="released"/>
+		<set-variable value="#[attributes.headers.host]" doc:name="Set Host" doc:id="418add44-d3a8-43ca-ae77-ff4f84ce1cc2" variableName="host"/>
+		<set-variable value="#[payload.data.attributes.languages]" doc:name="Set Languages" doc:id="da20e0f6-7287-44fc-a257-eafe64cadb1b" variableName="languages" mimeType="application/json"/>
+		<set-variable value="#[payload.data.attributes.genres]" doc:name="Set Genres" doc:id="e2ac17c5-4352-4487-9cc2-59a33fe93810" variableName="genres"/>
+		<set-variable value="#[attributes.requestPath]" doc:name="Set Request Path" doc:id="519cdd4a-b838-4841-86f8-9455426dff56" variableName="reqpath" />
 		<db:insert doc:name="Insert New Movie" doc:id="b37bc431-be2f-4f23-8958-040156c21cc8" config-ref="Database_Config">
 			<db:sql ><![CDATA[INSERT INTO movie (title, description, released, duration, gross) VALUES (:movie_title, :movie_desc, :movie_rel, :movie_dur, :movie_gross)]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{
@@ -34,71 +35,64 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		<db:select doc:name="Get Movie" doc:id="e732a66c-2c7c-4bd0-919b-0900b3e981a1" config-ref="Database_Config">
 			<db:sql ><![CDATA[SELECT id, title, description, released, duration, gross, created_at, updated_at from movie where title=:title and released=:released]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{
-	title: vars.'vars.title',
-	released: vars.'vars.released'
+	title: vars.title,
+	released: vars.released
 }]]]></db:input-parameters>
 		</db:select>
-		<set-variable value="#[payload[0].id]" doc:name="Set Movie Id" doc:id="5a112b22-f8a0-467e-ba9c-cf7c3b11aa33" variableName="vars.movieid"/>
+		<set-variable value="#[payload[0].id]" doc:name="Set Movie Id" doc:id="5a112b22-f8a0-467e-ba9c-cf7c3b11aa33" variableName="movieid"/>
 		<flow-ref doc:name="Add Languages" doc:id="ff824731-9d2c-498f-ae63-db45585b5844" name="post-movieAddLanguagesFlow"/>
 		<flow-ref doc:name="Add Genres" doc:id="d481f6e9-d98c-44ff-8bd1-3603fa1a1d9e" name="post-movieAddGenresFlow"/>
-		<ee:transform doc:name="Set Response" doc:id="b58d444c-4e2a-421d-ada7-12020b71f5ec">
+		<ee:transform doc:name="Set Request Path" doc:id="935164f4-4ef2-4ff7-81ab-e3a0ed8b6e55">
 			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="reqpath"><![CDATA[%dw 2.0
+output application/java
+---
+vars.reqpath ++ "/" ++ vars.movieid
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Get Movie" doc:id="ec63e9b6-4312-402b-8433-b93b0a220b9a" name="get-movieSubFlow" />
+		<ee:transform doc:name="Transform Message" doc:id="611be5ed-6391-4f41-84cf-1b5b26841aeb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-{
-  links: {
-    self: "http://" ++ vars.'vars.host' ++ "/" ++ app.name ++ vars.'vars.reqpath' ++ "/" ++ payload[0].id 
-  },
-  data: {
-    "type": "movies",
-    id: payload[0].id as String,
-    attributes: {
-      title: payload[0].title,
-      description: payload[0].description,
-      year: payload[0].released,
-      duration: payload[0].duration,
-      gross: payload[0].gross,
-      timestamps: {
-        created: ((payload[0].created_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"}),
-        updated: ((payload[0].updated_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"})
-      }
-    }
-  }
-}]]></ee:set-payload>
+payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Flow Complete" doc:id="3a34ee86-a222-48cf-9d27-515974a7b770" message="The flow has completed"/>
+		<logger level="INFO" doc:name="Flow Complete" doc:id="3a34ee86-a222-48cf-9d27-515974a7b770" message="The flow has completed; payload: #[payload]" />
 	</flow>
 	<flow name="post-movieAddLanguagesFlow" doc:id="12169c02-b9cc-40f9-aece-553d4ed3bbd5" >
 		<logger level="INFO" doc:name="Add Languages Started" doc:id="ed80a447-d64d-4cfb-bf19-2c95624d6244" message="Add languages sub flow started"/>
-		<foreach doc:name="For Each" doc:id="2c4461f3-2b05-4974-b15a-dd62088c746b" collection="#[vars.'vars.languages']">
+		<foreach doc:name="For Each" doc:id="2c4461f3-2b05-4974-b15a-dd62088c746b" collection="#[vars.languages]">
 			<logger level="INFO" doc:name="Add Language" doc:id="40778c4a-6147-42f2-a215-93389b3cecdf" message="#[payload]"/>
-			<set-variable value="#[payload]" doc:name="Set Language" doc:id="6ec903df-cf8b-4d60-8c8d-27b621019f82" variableName="vars.language"/>
+			<set-variable value="#[payload]" doc:name="Set Language" doc:id="6ec903df-cf8b-4d60-8c8d-27b621019f82" variableName="language"/>
 			<flow-ref doc:name="Get Language Id" doc:id="171f5a06-b864-43b1-9cd8-1f18cb5105b7" name="post-movieGetLangageFlow"/>
 			<logger level="INFO" doc:name="Language Exists?" doc:id="3bfc3ba4-c4d4-4378-b55d-f18cffe803ff" message="Records returned: #[sizeOf(payload)]"/>
 			<choice doc:name="Choice" doc:id="f33b7258-eb17-445b-b455-76de5382af53" >
 				<when expression="#[sizeOf(payload) &gt; 0]">
-					<logger level="DEBUG" doc:name="Language Exists" doc:id="028ab4ac-981b-4f6b-8366-834d4a4b418b" message="Language already exists: #[vars.'vars.language']"/>
+					<logger level="DEBUG" doc:name="Language Exists" doc:id="028ab4ac-981b-4f6b-8366-834d4a4b418b" message="Language already exists: #[vars.language]"/>
 				</when>
 				<otherwise >
-					<logger level="DEBUG" doc:name="Add New Language" doc:id="91ea0aaa-ebc2-4268-9628-08b8a7a60c84" message="Adding new language: #[vars.'vars.language']"/>
+					<logger level="DEBUG" doc:name="Add New Language" doc:id="91ea0aaa-ebc2-4268-9628-08b8a7a60c84" message="Adding new language: #[vars.language]"/>
 					<db:insert doc:name="Insert New Language" doc:id="a3387ee2-9be4-47ec-9014-40c0b7efed83" config-ref="Database_Config">
 						<db:sql ><![CDATA[INSERT INTO language (name) values (:name)]]></db:sql>
 						<db:input-parameters ><![CDATA[#[{
-	name: vars.'vars.language'
+	name: vars.language
 }]]]></db:input-parameters>
 					</db:insert>
 					<logger level="INFO" doc:name="Insert New Language Complete" doc:id="bd868eeb-11fa-4da7-8872-12054d32bf28" message="Insert new language complete"/>
 				</otherwise>
 			</choice>
 			<flow-ref doc:name="Get Language Id" doc:id="22022f74-926f-4bc8-8cbe-ed36b7719d39" name="post-movieGetLangageFlow" />
-			<set-variable value="#[payload[0].id]" doc:name="Set Language Id" doc:id="9f41bc21-ed0e-4559-a745-1bb20509b120" variableName="vars.languageid" />
+			<set-variable value="#[payload[0].id]" doc:name="Set Language Id" doc:id="9f41bc21-ed0e-4559-a745-1bb20509b120" variableName="languageid" />
 			<db:insert doc:name="Insert Language Relationship" doc:id="5173f868-f6ac-4d1e-a6f6-043a38b96058" config-ref="Database_Config">
 						<db:sql><![CDATA[INSERT INTO movie_language (movie_id, language_id) values (:movie_id, :language_id)]]></db:sql>
 						<db:input-parameters><![CDATA[#[{
-	movie_id: vars.'vars.movieid',
-	language_id: vars.'vars.languageid'
+	movie_id: vars.movieid,
+	language_id: vars.languageid
 }]]]></db:input-parameters>
 					</db:insert>
 		</foreach>
@@ -107,39 +101,39 @@ output application/json
 		<db:select doc:name="Select Language Id" doc:id="84e2fdad-0d3f-48f8-a44e-17dcf098f99a" config-ref="Database_Config" >
 			<db:sql ><![CDATA[SELECT id, name from language where name=:name]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{
-	name: vars.'vars.language',
+	name: vars.language
 }]]]></db:input-parameters>
 		</db:select>
 	</flow>
 	<flow name="post-movieAddGenresFlow" doc:id="72c657f6-255d-4156-9314-982fdf8145d4" >
 		<logger level="INFO" doc:name="Add Genres Started" doc:id="a97489e1-845c-4d21-b5f6-b8fa950da4b7" message="Add genres sub flow started"/>
-		<foreach doc:name="For Each" doc:id="b489846e-4e9f-40f2-ac8c-604c11e2bb64" collection="#[vars.'vars.genres']">
+		<foreach doc:name="For Each" doc:id="b489846e-4e9f-40f2-ac8c-604c11e2bb64" collection="#[vars.genres]">
 			<logger level="INFO" doc:name="Add Genre" doc:id="24386972-ee1b-4281-93da-f786a98b82e8" message="Adding genre: #[payload]"/>
-			<set-variable value="#[payload]" doc:name="Set Genre" doc:id="26bab435-ff58-4762-a5fa-c338a99f02bf" variableName="vars.genre"/>
+			<set-variable value="#[payload]" doc:name="Set Genre" doc:id="26bab435-ff58-4762-a5fa-c338a99f02bf" variableName="genre"/>
 			<flow-ref doc:name="Get Genre Id" doc:id="cabd5f48-e911-4554-9083-32cd42ebe821" name="post-movieGetGenreFlow"/>
-			<logger level="INFO" doc:name="Genre Exists?" doc:id="b2e5695a-fe09-4c4a-b92c-09d609f7a40b" message="Records returned for genre '#[vars.'vars.genre']': #[sizeOf(payload)]"/>
+			<logger level="INFO" doc:name="Genre Exists?" doc:id="b2e5695a-fe09-4c4a-b92c-09d609f7a40b" message="Records returned for genre '#[vars.genre]': #[sizeOf(payload)]"/>
 			<choice doc:name="Choice" doc:id="4e4e35bf-d96a-45a9-8b14-ea723ab831f6">
 			<when expression="#[sizeOf(payload) &gt; 0]">
-					<logger level="DEBUG" doc:name="Genre Exists" doc:id="c1cecd84-d74e-471e-9e2f-48c1a674109c" message="Genre already exists: #[vars.'vars.genre']"/>
+					<logger level="DEBUG" doc:name="Genre Exists" doc:id="c1cecd84-d74e-471e-9e2f-48c1a674109c" message="Genre already exists: #[vars.genre]"/>
 				</when>
 				<otherwise >
-					<logger level="DEBUG" doc:name="Add New Genre" doc:id="d08835a3-eab0-4b69-b3b2-33c42e421c25" message="Adding new language: #[vars.'vars.genre']"/>
+					<logger level="DEBUG" doc:name="Add New Genre" doc:id="d08835a3-eab0-4b69-b3b2-33c42e421c25" message="Adding new language: #[vars.genre]"/>
 					<db:insert doc:name="Insert New Genre" doc:id="ce9f1529-0fe8-4718-bc59-d6a753428017" config-ref="Database_Config">
 						<db:sql ><![CDATA[INSERT INTO genre (name) values (:name)]]></db:sql>
 						<db:input-parameters ><![CDATA[#[{
-	name: vars.'vars.genre'
+	name: vars.genre
 }]]]></db:input-parameters>
 					</db:insert>
 					<logger level="DEBUG" doc:name="Insert New Genre Complete" doc:id="2b56a005-e070-430e-9a20-e44b40fd704d" message="nsert new language complete"/>
 				</otherwise>
 		</choice>
 			<flow-ref doc:name="Get Genre Id" doc:id="5d2c804f-61ea-4b81-a7b8-6b866846d117" name="post-movieGetGenreFlow" />
-			<set-variable value="#[payload[0].id]" doc:name="Set Genre Id" doc:id="84acee92-a574-4b92-9a86-021e4f31d2c0" variableName="vars.genreid"/>
+			<set-variable value="#[payload[0].id]" doc:name="Set Genre Id" doc:id="84acee92-a574-4b92-9a86-021e4f31d2c0" variableName="genreid"/>
 			<db:insert doc:name="Insert Genre Relationship" doc:id="3c182416-c445-4fec-b65c-15db8c77f2a0" config-ref="Database_Config">
 				<db:sql ><![CDATA[INSERT INTO movie_genre (movie_id, genre_id) values (:movie_id, :genre_id)]]></db:sql>
 				<db:input-parameters ><![CDATA[#[{
-	movie_id: vars.'vars.movieid',
-	genre_id: vars.'vars.genreid'
+	movie_id: vars.movieid,
+	genre_id: vars.genreid
 }]]]></db:input-parameters>
 			</db:insert>
 		</foreach>
@@ -148,7 +142,7 @@ output application/json
 		<db:select doc:name="Select Genre Id" doc:id="0b1a0336-1078-472f-964d-4d3fb6607dfd" config-ref="Database_Config">
 			<db:sql ><![CDATA[SELECT id, name from genre where name=:name]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{
-	name: vars.'vars.genre',
+	name: vars.genre
 }]]]></db:input-parameters>
 		</db:select>
 	</flow>
