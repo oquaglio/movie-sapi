@@ -20,13 +20,48 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 }]]]></db:input-parameters>
 		</db:select>
 		<set-variable value="#[payload[0]]" doc:name="Set Movie" doc:id="4ae6e887-8a46-4884-80c9-6fbecc90787b" variableName="movie" />
+		<flow-ref doc:name="Flow Reference to Get Movie Languages" doc:id="23a6c83c-2e87-4c87-96c2-dca3b68dd463" name="get-movieGetLanguagesFlow"/>
+		<flow-ref doc:name="Flow Reference to Get Movie Genres" doc:id="6a0569ca-3810-493f-a064-f677127f0dd7" name="get-movieGetGenresFlow"/>
+		<ee:transform doc:name="Set Response" doc:id="28522938-75cb-46dc-a321-5d5ce0927be3">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	links: {
+		self: "http://" ++ vars.host ++ "/" ++ app.name ++ vars.reqpath
+	},
+	data: {
+		"type": "movies",
+		id: vars.movie.id as String,
+		attributes: {
+			title: vars.movie.title,
+			description: vars.movie.description,
+			year: vars.movie.released,
+			duration: vars.movie.duration,
+			gross: vars.movie.gross,
+			languages: vars.languages.name,
+			genres: vars.genres.name,
+			timestamps: {
+				created: ((vars.movie.created_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"}),
+				updated: ((vars.movie.updated_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"})
+			}
+		}		 
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Flow Complete" doc:id="50f76e7a-b909-45a8-aa75-a1c3dcba13a7" message="The flow has completed" />
+	</sub-flow>
+	<flow name="get-movieGetLanguagesFlow" doc:id="dda17ef5-0150-4360-91af-f52f04a360db" >
+		<logger level="INFO" doc:name="Get Languages" doc:id="aa026605-16cf-4a3e-954a-4186fdc6723a" message="Get Languages: Getting languages for movie"/>
 		<db:select doc:name="Select Movie Languages" doc:id="db9eeeb6-5a8c-4303-ade8-96d90aab89aa" config-ref="Database_Config">
 			<db:sql><![CDATA[select * from movie_language where movie_id = :movie_id]]></db:sql>
 			<db:input-parameters><![CDATA[#[{
 	movie_id: vars.movieid
 }]]]></db:input-parameters>
 		</db:select>
-		<set-variable value="#[payload.language_id]" doc:name="Set Languages" doc:id="b348c1b2-8c8a-4cf1-94db-2fb4228015f0" variableName="language_ids" />
+		<set-variable value="#[payload.language_id]" doc:name="Set Language Ids" doc:id="b348c1b2-8c8a-4cf1-94db-2fb4228015f0" variableName="language_ids" />
 		<ee:transform doc:name="Generate Dynamic In-Clause for Language Select" doc:id="b0c3a600-a0aa-4762-b955-ab65b123b52e">
 			<ee:message>
 			</ee:message>
@@ -51,34 +86,41 @@ vars.language_ids map {"arg$$" : $} reduce ((item, accumulator = {}) -> item ++ 
 			<db:sql><![CDATA[#['select * from language where id in ( $(vars.inClause) )']]]></db:sql>
 			<db:input-parameters><![CDATA[#[vars.inputParameters]]]></db:input-parameters>
 		</db:select>
-		<ee:transform doc:name="Set Response" doc:id="28522938-75cb-46dc-a321-5d5ce0927be3">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	links: {
-		self: "http://" ++ vars.host ++ "/" ++ app.name ++ vars.reqpath
-	},
-	data: {
-		"type": "movies",
-		id: vars.movie.id as String,
-		attributes: {
-			title: vars.movie.title,
-			description: vars.movie.description,
-			year: vars.movie.released,
-			duration: vars.movie.duration,
-			gross: vars.movie.gross,
-			languages: payload.name,
-			timestamps: {
-				created: ((vars.movie.created_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"}),
-				updated: ((vars.movie.updated_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"})
-			}
-		}		 
-	}
-}]]></ee:set-payload>
+		<set-variable value="#[payload]" doc:name="Set Langauges" doc:id="810874c5-6fb7-41a7-b5f7-79616ab9fa8e" variableName="languages"/>
+	</flow>
+	<flow name="get-movieGetGenresFlow" doc:id="51e88d49-bcab-47a1-bbeb-49dd8113dd5a" >
+		<logger level="INFO" doc:name="Get Genres" doc:id="96687425-9665-4a02-90e9-7128dfe0d46a" message="Get Genres: Getting languages for movie"/>
+		<db:select doc:name="Select Movie Genres" doc:id="852478e9-dde9-4967-b23c-3aa86e26db0e" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from movie_genre where movie_id = :movie_id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	movie_id: vars.movieid
+}]]]></db:input-parameters>
+		</db:select>
+		<set-variable value="#[payload.genre_id]" doc:name="Set Genre Ids" doc:id="e564fba3-3f23-448e-a4d7-1267a9295824" variableName="genre_ids"/>
+		<ee:transform doc:name="Generate Dynamic In-Clause for Genre Select" doc:id="64c57fe1-c3cd-4c48-8473-babda1b1f1d4" >
+			<ee:message >
 			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="inClause" ><![CDATA[%dw 2.0
+output application/java
+---
+vars.genre_ids map ":arg$$" reduce ((item, accumulator) -> accumulator ++ ", " ++ item)]]></ee:set-variable>
+			</ee:variables>
 		</ee:transform>
-		<logger level="INFO" doc:name="Flow Complete" doc:id="50f76e7a-b909-45a8-aa75-a1c3dcba13a7" message="The flow has completed" />
-	</sub-flow>
+		<ee:transform doc:name="Generate Dynamic InputParameters for Genre Select" doc:id="d25d58f8-e399-4d89-b156-a45994c14fde" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="inputParameters" ><![CDATA[%dw 2.0
+output application/java
+---
+vars.genre_ids map {"arg$$" : $} reduce ((item, accumulator = {}) -> item ++ accumulator)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<db:select doc:name="Select Genres" doc:id="aa14891b-fdcb-4134-91f7-2194b31a1b9f" config-ref="Database_Config">
+			<db:sql ><![CDATA[#['select * from genre where id in ( $(vars.inClause) )']]]></db:sql>
+			<db:input-parameters ><![CDATA[#[vars.inputParameters]]]></db:input-parameters>
+		</db:select>
+		<set-variable value="#[payload]" doc:name="Set Genres" doc:id="da4f6e4b-3a81-4fb3-9cdd-a38c996a5a9f" variableName="genres"/>
+	</flow>
 </mule>
