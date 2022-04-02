@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Movie id" doc:id="677440ba-0aba-45f2-87cf-6cd7b80a99f8" variableName="movieid"/>
 		<set-variable value="#[attributes.requestPath]" doc:name="Set Request Path" doc:id="80ecc26b-f28e-4ddb-aa93-a68d6017241d" variableName="reqpath" />
 		<set-variable value="#[attributes.headers.host]" doc:name="Set Host" doc:id="47e1f2b5-0352-443b-8b3e-7ac7e89b17b2" variableName="host"/>
-		<flow-ref doc:name="Flow Reference" doc:id="5f2bf484-b496-4e48-bd35-802a430cc309" name="get-movieSubFlow" />
+		<flow-ref doc:name="get-movieSubFlow" doc:id="5f2bf484-b496-4e48-bd35-802a430cc309" name="get-movieSubFlow" />
 	</flow>
 	<sub-flow name="get-movieSubFlow" doc:id="918b9a74-64a5-4b7c-8510-e195ca2fcf24">
 		<db:select doc:name="Get Movie" doc:id="839c79cb-fa14-46ee-a1d1-648520dbf0b6" config-ref="Database_Config">
@@ -20,8 +20,8 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 }]]]></db:input-parameters>
 		</db:select>
 		<set-variable value="#[payload[0]]" doc:name="Set Movie" doc:id="4ae6e887-8a46-4884-80c9-6fbecc90787b" variableName="movie" />
-		<flow-ref doc:name="Flow Reference to Get Movie Languages" doc:id="23a6c83c-2e87-4c87-96c2-dca3b68dd463" name="get-movieGetLanguagesFlow"/>
-		<flow-ref doc:name="Flow Reference to Get Movie Genres" doc:id="6a0569ca-3810-493f-a064-f677127f0dd7" name="get-movieGetGenresFlow"/>
+		<flow-ref doc:name="get-movieGetLanguagesFlow" doc:id="23a6c83c-2e87-4c87-96c2-dca3b68dd463" name="get-movieGetLanguagesFlow"/>
+		<flow-ref doc:name="get-movieGetGenresFlow" doc:id="6a0569ca-3810-493f-a064-f677127f0dd7" name="get-movieGetGenresFlow"/>
 		<ee:transform doc:name="Set Response" doc:id="28522938-75cb-46dc-a321-5d5ce0927be3">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
