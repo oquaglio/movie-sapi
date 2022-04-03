@@ -53,7 +53,9 @@ vars.reqpath ++ "/" ++ vars.movieid
 ]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<flow-ref doc:name="Get Movie" doc:id="ec63e9b6-4312-402b-8433-b93b0a220b9a" name="get-movieSubFlow" />
+		<flow-ref doc:name="get-movieSubFlow" doc:id="ec63e9b6-4312-402b-8433-b93b0a220b9a" name="get-movieSubFlow" />
+		<set-variable value="201" doc:name="Set HTTP Response Code 201" doc:id="24ea2fe3-8838-4585-aaab-a2e3f6ba412a" variableName="httpStatus"/>
+		<set-variable value='#[{&#10;	    "Location" : payload.links.self&#10;    }]' doc:name="Set HTTP Response Headers" doc:id="e4130c1b-621e-4b65-ab4b-0b6a688c52fa" variableName="outboundHeaders"/>
 		<ee:transform doc:name="Transform Message" doc:id="611be5ed-6391-4f41-84cf-1b5b26841aeb" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
