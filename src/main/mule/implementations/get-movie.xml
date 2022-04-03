@@ -54,7 +54,7 @@ output application/json
 		<logger level="INFO" doc:name="Flow Complete" doc:id="50f76e7a-b909-45a8-aa75-a1c3dcba13a7" message="The flow has completed" />
 	</sub-flow>
 	<flow name="get-movieGetLanguagesFlow" doc:id="dda17ef5-0150-4360-91af-f52f04a360db" >
-		<logger level="INFO" doc:name="Get Languages" doc:id="aa026605-16cf-4a3e-954a-4186fdc6723a" message="Get Languages: Getting languages for movie"/>
+		<logger level="INFO" doc:name="Get Languages" doc:id="aa026605-16cf-4a3e-954a-4186fdc6723a" message='Get Languages: Getting languages for movie "#[vars.movidid]"'/>
 		<db:select doc:name="Select Movie Languages" doc:id="db9eeeb6-5a8c-4303-ade8-96d90aab89aa" config-ref="Database_Config">
 			<db:sql><![CDATA[select * from movie_language where movie_id = :movie_id]]></db:sql>
 			<db:input-parameters><![CDATA[#[{

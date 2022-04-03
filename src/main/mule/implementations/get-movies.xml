@@ -7,37 +7,55 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	<flow name="get-moviesFlow" doc:id="9fed4b58-40fd-4f0b-a300-60de68076d82" >
 		<logger level="INFO" doc:name="Logger" doc:id="4dd35f87-7f33-4e20-a8dd-a69a111b2564" message="Get request received"/>
-		<set-variable value="#[attributes.requestPath]" doc:name="Set Request Path" doc:id="4ec04fa0-872e-4845-a6d0-0ad6e2c7d9fa" variableName="vars.reqpath" />
-		<set-variable value="#[attributes.headers.host]" doc:name="Set Host" doc:id="03fbf957-1bdd-4dba-8cb9-a6efe1db3131" variableName="vars.host" />
+		<set-variable value="#[attributes.requestPath]" doc:name="Set Request Path" doc:id="4ec04fa0-872e-4845-a6d0-0ad6e2c7d9fa" variableName="reqpath" />
+		<set-variable value="#[attributes.headers.host]" doc:name="Set Host" doc:id="03fbf957-1bdd-4dba-8cb9-a6efe1db3131" variableName="host" />
+		<set-variable value="#[output application/json --- []]" doc:name="Set movies" doc:id="461346f8-fb9f-495f-9637-916584d65829" variableName="movies"/>
 		<db:select doc:name="Get Movies" doc:id="01d0a999-b82b-4d67-aaee-2d15731ed24d" config-ref="Database_Config" >
 			<db:sql ><![CDATA[SELECT id, title, description, released, duration, gross, created_at, updated_at from movie]]></db:sql>
 		</db:select>
-		<ee:transform doc:name="Set Response" doc:id="a3c8dc8a-247b-4ad3-bbce-e7eee96de859">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
+		<foreach doc:name="For Each" doc:id="01529494-3a6e-4622-9ccd-1c4b3af34972" collection="#[payload]">
+			<logger level="INFO" doc:name="Logger" doc:id="bd5c33ef-931e-4fd5-a5a4-d961265e1117" message='Processing movie id "#[payload.id]"'/>
+			<set-variable value="#[payload]" doc:name="Set Movie" doc:id="5f579743-1d67-4851-a391-5dab9ed53f79" variableName="movie"/>
+			<set-variable value="#[payload.id]" doc:name="Set Movie Id" doc:id="165f7f0f-d329-4e18-b464-cac99e2511f3" variableName="movieid"/>
+			<flow-ref doc:name="get-movieGetLanguagesFlow" doc:id="2bb8adcf-c5df-4c8e-b358-e707bc953947" name="get-movieGetLanguagesFlow"/>
+			<flow-ref doc:name="get-movieGetGenresFlow" doc:id="b4d72289-7f41-4362-98bf-5f619fff0e75" name="get-movieGetGenresFlow"/>
+			<ee:transform doc:name="Transform Message" doc:id="e7679f8c-9cc6-42df-a6fe-90b5ca0d0dcd" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"type": "movies",
+	id: vars.movie.id as String,
+	attributes: {
+		title: vars.movie.title,
+		description: vars.movie.description,
+		year: vars.movie.released,
+		duration: vars.movie.duration,
+		gross: vars.movie.gross,
+		languages: vars.languages.name,
+		genres: vars.genres.name,
+		timestamps: {
+			created: ((vars.movie.created_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"}),
+			updated: ((vars.movie.updated_at >> "UTC") as String {format: "yyyy-MM-dd'T'HH:mm:ss"})
+		}
+	}		 	
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="#[vars.movies &lt;&lt; payload]" doc:name="Append movie to movies" doc:id="74511654-9ac0-49d6-ad9a-6e738eff7a22" variableName="movies"/>
+			<logger level="INFO" doc:name="Logger" doc:id="1a44c292-8936-4658-8c87-0b045da20777" message="End movie" />
+		</foreach>
+		<ee:transform doc:name="Set Response Payload" doc:id="a7e60682-64e7-4cc8-aff4-de7f8c83c30c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
 {
   links: {
-    self: "http://" ++ vars.'vars.host' ++ "/" ++ app.name ++ vars.'vars.reqpath'
+    self: "http://" ++ vars.host ++ "/" ++ app.name ++ vars.reqpath
   },
-  data: [
-	(payload map {
-		"type": "movies",
-		id: $.id as Number,
-		attributes:{
-			title: $.title as String,			
-			description: $.description as String,
-			released: $.released as Number,
-			duration: $.duration as Number,
-			gross: $.gross as Number,
-			timestamps: {
-				created: $.created_at,
-				updated: $.updated_at,
-			}
-		}		
-	})
-  ] 	  	
+  data: vars.movies  	
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
