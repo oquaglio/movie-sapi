@@ -46,14 +46,14 @@ output application/json
 			<set-variable value="#[vars.movies &lt;&lt; payload]" doc:name="Append movie to movies" doc:id="74511654-9ac0-49d6-ad9a-6e738eff7a22" variableName="movies"/>
 			<logger level="INFO" doc:name="Logger" doc:id="1a44c292-8936-4658-8c87-0b045da20777" message="End movie" />
 		</foreach>
-		<ee:transform doc:name="Set Response Payload" doc:id="a7e60682-64e7-4cc8-aff4-de7f8c83c30c" >
+		<ee:transform doc:name="Set Response" doc:id="a7e60682-64e7-4cc8-aff4-de7f8c83c30c" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
 {
   links: {
-    self: "http://" ++ vars.host ++ "/" ++ app.name ++ vars.reqpath
+    self: "http://" ++ vars.host ++ "/" ++ app.name ++ vars.requestUri
   },
   data: vars.movies  	
 }]]></ee:set-payload>
