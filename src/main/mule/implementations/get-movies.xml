@@ -19,7 +19,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 			<set-variable value="#[payload.id]" doc:name="Set Movie Id" doc:id="165f7f0f-d329-4e18-b464-cac99e2511f3" variableName="movieid"/>
 			<flow-ref doc:name="get-movieGetLanguagesFlow" doc:id="2bb8adcf-c5df-4c8e-b358-e707bc953947" name="get-movieGetLanguagesFlow"/>
 			<flow-ref doc:name="get-movieGetGenresFlow" doc:id="b4d72289-7f41-4362-98bf-5f619fff0e75" name="get-movieGetGenresFlow"/>
-			<ee:transform doc:name="Transform Message" doc:id="e7679f8c-9cc6-42df-a6fe-90b5ca0d0dcd" >
+			<ee:transform doc:name="Set Movie" doc:id="e7679f8c-9cc6-42df-a6fe-90b5ca0d0dcd" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
