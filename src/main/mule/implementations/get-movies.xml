@@ -8,10 +8,51 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	<flow name="get-moviesFlow" doc:id="9fed4b58-40fd-4f0b-a300-60de68076d82" >
 		<logger level="INFO" doc:name="Logger" doc:id="4dd35f87-7f33-4e20-a8dd-a69a111b2564" message="Get request received"/>
 		<set-variable value="#[attributes.requestPath]" doc:name="Set Request Path" doc:id="4ec04fa0-872e-4845-a6d0-0ad6e2c7d9fa" variableName="reqpath" />
+		<set-variable value="#[attributes.requestUri]" doc:name="Set Request URI" doc:id="1d8344c4-6dfb-4627-a027-d8e84ec689a5" variableName="requestUri"/>
 		<set-variable value="#[attributes.headers.host]" doc:name="Set Host" doc:id="03fbf957-1bdd-4dba-8cb9-a6efe1db3131" variableName="host" />
 		<set-variable value="#[output application/json --- []]" doc:name="Set movies" doc:id="461346f8-fb9f-495f-9637-916584d65829" variableName="movies"/>
+		<choice doc:name="Add where clause for year" doc:id="2ea0a4bd-2eb9-4b9c-969d-8fed28f8b938" >
+			<when expression="#[attributes.queryParams.year?]">
+				<logger level="INFO" doc:name="Log year query param" doc:id="cdf90e09-3d22-4d69-bef3-83666e0e1bf3" message="year query param: #[attributes.queryParams.year]"/>
+				<ee:transform doc:name="Create AND Clause" doc:id="e710357e-6fc2-49a5-a2c8-c5d76c1c2f2d" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="yearClause" ><![CDATA[%dw 2.0
+output application/java
+---
+"released > " ++ attributes.queryParams.year]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+		</choice>
 		<db:select doc:name="Get Movies" doc:id="01d0a999-b82b-4d67-aaee-2d15731ed24d" config-ref="Database_Config" >
-			<db:sql ><![CDATA[SELECT id, title, description, released, duration, gross, created_at, updated_at from movie]]></db:sql>
+			<db:sql ><![CDATA[#[
+import * from dw::core::Strings
+output text/plain
+
+fun get_op(str) = str match {
+    case "gte" -> ">="    
+    case "lte" -> "<="    
+    case "gt" -> ">"    
+    case "lt" -> "<"    
+    case "eq" -> "=="    
+    else -> $
+}
+
+fun replace_op(str) = get_op(substringBefore(str, ":")) ++ " " ++ substringAfter(str, ":")
+
+---
+"
+SELECT
+	id, title, description, released, duration, gross, created_at, updated_at 
+FROM
+	movie m WHERE " ++ (
+		if (attributes.queryParams.year?)
+	    	"released " ++ (attributes.queryParams.*year map (replace_op($)) joinBy " AND released ")		
+	    else ""
+ 	)
+]]]></db:sql>
 		</db:select>
 		<foreach doc:name="For Each" doc:id="01529494-3a6e-4622-9ccd-1c4b3af34972" collection="#[payload]">
 			<logger level="INFO" doc:name="Logger" doc:id="bd5c33ef-931e-4fd5-a5a4-d961265e1117" message='Processing movie id "#[payload.id]"'/>
