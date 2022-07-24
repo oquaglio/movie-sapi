@@ -36,7 +36,7 @@
 <h3 align="center">Movie SAPI</h3>
 
   <p align="center">
-    Mulesoft System API for Movie Resources
+    Mulesoft System API
     <br />
     <a href="https://github.com/oquaglio/movie-sapi"><strong>Explore the docs »</strong></a>
     <br />
@@ -117,6 +117,27 @@ To get a local copy up and running follow these simple example steps.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
+
+### GET
+
+#### Filter by year
+
+```
+/movies?year=eq:1990
+/movies?year=lte:1990
+/movies?year=lt:1990
+/movies?year=gte:1990
+/movies?year=gt:1990
+/movies?year=gt:1990&year=lte:2000
+```
+where eq = equals, gte = greater than or equal to, etc.
+
+Multiple year parameters will be ANDed together.
+
+#### Filter by title
+```
+/movies?title=the vast of night
+```
 
 <!--_For more examples, please refer to the [Documentation](https://example.com)_-->
 
