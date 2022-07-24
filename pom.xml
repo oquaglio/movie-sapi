@@ -55,13 +55,6 @@
 			<classifier>mule-plugin</classifier>
 		</dependency>
 		<dependency>
-			<groupId>0d501a90-6d34-43c6-b74e-b50a517c7af5</groupId>
-			<artifactId>movie-sapi</artifactId>
-			<version>0.0.4</version>
-			<classifier>raml</classifier>
-			<type>zip</type>
-		</dependency>
-		<dependency>
 			<groupId>org.mule.modules</groupId>
 			<artifactId>mule-apikit-module</artifactId>
 			<version>1.5.8</version>
@@ -83,6 +76,13 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>8.0.22</version>
+		</dependency>
+		<dependency>
+			<groupId>0d501a90-6d34-43c6-b74e-b50a517c7af5</groupId>
+			<artifactId>movie-sapi</artifactId>
+			<version>0.0.5</version>
+			<classifier>raml</classifier>
+			<type>zip</type>
 		</dependency>
 	</dependencies>
 

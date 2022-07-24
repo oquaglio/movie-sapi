@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">    
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
     <flow name="movie-sapi-main">
         <http:listener config-ref="movie-sapi-httpListenerConfig" path="/v1/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -141,21 +141,21 @@ output application/json
         </error-handler>
     </flow>
     <flow name="put:\movies\(id):application\json:movie-sapi-config">
-		<flow-ref doc:name="Flow Reference" doc:id="281c596c-22f0-483a-acec-d76d32aa5f52" name="put-movieFlow"/>
+        <flow-ref doc:name="Flow Reference" doc:id="281c596c-22f0-483a-acec-d76d32aa5f52" name="put-movieFlow" />
     </flow>
     <flow name="delete:\movies\(id):movie-sapi-config">
-		<flow-ref doc:name="Flow Reference" doc:id="2b42991b-a70a-46fe-89e7-a87bb7ff7dfe" name="delete-movieFlow"/>
+        <flow-ref doc:name="Flow Reference" doc:id="2b42991b-a70a-46fe-89e7-a87bb7ff7dfe" name="delete-movieFlow" />
     </flow>
     <flow name="patch:\movies\(id):application\json:movie-sapi-config">
-		<flow-ref doc:name="Flow Reference" doc:id="8db8b719-7509-425f-b2ad-d266951814b5" name="patch-movieFlow"/>
+        <flow-ref doc:name="Flow Reference" doc:id="8db8b719-7509-425f-b2ad-d266951814b5" name="patch-movieFlow" />
     </flow>
     <flow name="get:\movies:movie-sapi-config">
-		<flow-ref doc:name="Flow Reference" doc:id="9499d3c6-3033-4351-a2c7-738012825485" name="get-moviesFlow"/>
+        <flow-ref doc:name="Flow Reference" doc:id="9499d3c6-3033-4351-a2c7-738012825485" name="get-moviesFlow" />
     </flow>
     <flow name="get:\movies\(id):movie-sapi-config">
-		<flow-ref doc:name="Flow Reference" doc:id="d4a8bae0-8cd5-4040-b92c-9063aff042dd" name="get-movieFlow"/>
+        <flow-ref doc:name="Flow Reference" doc:id="d4a8bae0-8cd5-4040-b92c-9063aff042dd" name="get-movieFlow" />
     </flow>
     <flow name="post:\movies:application\json:movie-sapi-config">
-		<flow-ref doc:name="Flow Reference" doc:id="8ef58865-2d51-46ca-a553-9e13cf9b8543" name="post-movieFlow"/>
+        <flow-ref doc:name="Flow Reference" doc:id="8ef58865-2d51-46ca-a553-9e13cf9b8543" name="post-movieFlow" />
     </flow>
 </mule>
